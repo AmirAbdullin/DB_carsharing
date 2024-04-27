@@ -18,6 +18,15 @@ git clone https://github.com/AmirAbdullin/DB_carsharing.git
 pip install -r requirements.txt
 ```
 
+# Добавьте необходимые сертификаты для подключения к PostgreSQL:
+
+```
+mkdir -p ~/.postgresql && \
+wget "https://storage.yandexcloud.net/cloud-certs/CA.pem" \
+     --output-document ~/.postgresql/root.crt && \
+chmod 0600 ~/.postgresql/root.crt
+```
+
 # Запуститие Streamlit:
 
 ```
