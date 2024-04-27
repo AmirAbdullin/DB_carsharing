@@ -7,12 +7,10 @@
 git clone https://github.com/AmirAbdullin/DB_carsharing.git
 ```
 
-# Создание окружения:
+# Создайте окружение: (оптимально)
 ```
  python -m venv DB_carsharing
-
  DB_carsharing\Scripts\activate
-
 ```
 #  Установите необходимые зависимости
 ```
@@ -23,5 +21,4 @@ pip install -r requirements.txt
 
 ```
 streamlit run app.py
-
 ```
