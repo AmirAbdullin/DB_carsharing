@@ -7,12 +7,13 @@
 git clone https://github.com/AmirAbdullin/DB_carsharing.git
 ```
 
-# Создайте окружение: (оптимально)
+# Создайте окружение (оптимально):
 ```
  python -m venv DB_carsharing
+
  DB_carsharing\Scripts\activate
 ```
-#  Установите необходимые зависимости
+#  Установите необходимые зависимости:
 ```
 pip install -r requirements.txt
 ```
