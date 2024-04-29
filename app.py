@@ -1,7 +1,16 @@
 import streamlit as st
 from pages import login, map_view  # Импортируем функции страниц из директории pages
+from postgre import async_connection
+import asyncio
+import os
 
-def main():
+
+pg = async_connection.PG([os.environ.get("DB_CREDENTIALS", "")])
+
+
+async def main():
+    print(await pg.get_table("users"))
+    
     st.sidebar.title("Навигация")  # Заголовок боковой панели (sidebar) для навигации
 
     # Создаем словарь для хранения названий страниц и соответствующих функций
@@ -16,5 +25,4 @@ def main():
     # Запускаем функцию выбранной страницы
     pages[selected_page]()
 
-if __name__ == "__main__":
-    main()
+asyncio.run(main())

@@ -24,7 +24,7 @@ conn = psycopg2.connect("""
     sslmode=verify-full
     dbname=carsharing
     user=user1
-    password=<пароль>
+    password=password
     target_session_attrs=read-write
 """)
 

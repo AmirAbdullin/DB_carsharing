@@ -15,6 +15,7 @@ cars_data = {
     "EliteLevel": ["Luxury", "Standard", "Standard", "Economy"]  # Уровень элитарности
 }
 
+
 # Преобразование данных в DataFrame
 df_cars = pd.DataFrame(cars_data)
 

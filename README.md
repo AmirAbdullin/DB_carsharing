@@ -32,3 +32,13 @@ chmod 0600 ~/.postgresql/root.crt
 ```
 streamlit run app.py
 ```
+
+
+
+# Для запуска Docker надо:
+
+```bash
+
+
+bash run_docker.sh
+```
