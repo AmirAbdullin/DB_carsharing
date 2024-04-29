@@ -1,64 +1,68 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import folium
+import asyncio
+import os
+from postgre import async_connection
 
-# Фиктивная база данных машин с дополнительной информацией
-cars_data = {
-    "CarID": [1, 2, 3, 4],
-    "Latitude": [55.751244, 55.756487, 55.759865, 55.752126],  # Координаты широты
-    "Longitude": [37.618423, 37.624989, 37.623815, 37.609227],  # Координаты долготы
-    "Model": ["Tesla Model 3", "Toyota Corolla", "Honda Civic", "Ford Focus"],
-    "Status": ["Free", "Occupied", "Free", "Free"],  # Статус машины
-    "FuelLevel": [80, 60, 75, 90],  # Уровень топлива
-    "PricePerHour": [1500, 800, 700, 600],  # Стоимость аренды в час
-    "EliteLevel": ["Luxury", "Standard", "Standard", "Economy"]  # Уровень элитарности
-}
+# Подключаемся к базе данных
+pg = async_connection.PG([os.environ.get("DB_CREDENTIALS", "")])
 
+# Определяем главную функцию для отображения карты
+async def show_map_view():
+    st.title("Карта всех автомобилей")
 
-# Преобразование данных в DataFrame
-df_cars = pd.DataFrame(cars_data)
+    # Получаем данные об уровнях автомобилей из базы данных
+    levels_query = "SELECT * FROM levels;"
+    levels_data = await pg.fetch(levels_query)
+    levels_dict = {level['level_id']: level['level'] for level in levels_data}
 
-def show_map_view():
-    st.title("Карта доступных автомобилей")
+    # Выбор уровня автомобиля
+    level_id = st.selectbox("Выберите уровень автомобиля:", options=["Все"] + list(levels_dict.values()))
 
-    # Выбор группы автомобилей
-    elite_levels = df_cars["EliteLevel"].unique()
-    selected_level = st.selectbox("Выберите уровень элитарности:", elite_levels)
+    # Формирование условия для SQL-запроса
+    condition = ""
+    if level_id != "Все":
+        condition = f"WHERE levels.level = '{level_id}'"
+
+    # Запрос данных о машинах и их координатах из базы данных с учетом выбранного уровня
+    cars_query = f"""
+    SELECT cars.*, locations.latitude, locations.longitude, levels.level
+    FROM cars 
+    JOIN locations ON cars.location_id = locations.id
+    JOIN levels ON cars.level = levels.level_id
+    {condition};
+    """
+    cars_data = await pg.fetch(cars_query)
 
     # Создание базовой карты с центром в центре Москвы
     map_center = [55.751244, 37.618423]  # Центр Москвы
     my_map = folium.Map(location=map_center, zoom_start=14)
 
+    # Определение цветов для разных уровней автомобилей
+    level_colors = {
+        'Elite': "purple",  # Elite
+        'Stadnart': "cadetblue",   # Standard
+    }
+
     # Отображение машин на карте
-    for index, row in df_cars.iterrows():
-        if row["EliteLevel"] == selected_level:
-            car_id = row["CarID"]
-            model = row["Model"]
-            status = row["Status"]
-            latitude = row["Latitude"]
-            longitude = row["Longitude"]
+    for car in cars_data:
+        car_id = car['id']
+        latitude = car['latitude']
+        longitude = car['longitude']
+        level = car['level']
 
-            # Отметка на карте для свободной машины
-            icon_color = "purple" if selected_level == "Luxury" else  "green"
-            marker = folium.Marker(
-                location=[latitude, longitude],
-                popup=f"Car ID: {car_id}<br>Model: {model}<br>Status: {status}",
-                icon=folium.Icon(color=icon_color, icon="car", prefix = "fa")
-            )
-            marker.add_to(my_map)
+        # Определение цвета значка в зависимости от уровня автомобиля
+        icon_color = level_colors.get(level, "gray")
 
-            # Обработчик события для отображения информации об автомобиле
-            if st.button(f"Подробнее о машине ID {car_id}"):
-                st.write(f"**Модель:** {model}")
-                st.write(f"**Статус:** {status}")
-                st.write(f"**Уровень топлива:** {row['FuelLevel']}%")
-                st.write(f"**Стоимость аренды в час:** {row['PricePerHour']} руб.")
-                st.image("Tesla.png", caption="Фото автомобиля", width=300)
-
-                # Дополнительная информация и кнопка "Забронировать"
-                st.write(f"**Государственный номер:** {generate_license_plate()}")  # Генерация номера
-                st.button("Забронировать")
+        # Отметка на карте для машины
+        popup_html = f"<b>Car ID:</b> {car_id}<br><b>Status:</b> {car['status']}<br><b>Description:</b> {car['description']}"
+        marker = folium.Marker(
+            location=[latitude, longitude],
+            popup=popup_html,
+            icon=folium.Icon(color=icon_color, icon="car", prefix="fa")
+        )
+        marker.add_to(my_map)
 
     # Преобразование карты в HTML
     map_html = my_map._repr_html_()
@@ -66,14 +70,10 @@ def show_map_view():
     # Отображение HTML с помощью st.components.v1.html
     st.components.v1.html(map_html, width=700, height=500)
 
-def generate_license_plate():
-    """Генерация случайного государственного номера."""
-    return f"{chr(65 + np.random.randint(0, 26))}{np.random.randint(100, 999)}{chr(65 + np.random.randint(0, 26))}"
-
-# Определяем главную функцию для отображения карты
-def main():
-    show_map_view()
+# Определяем главную функцию для запуска приложения
+async def main():
+    await show_map_view()
 
 # Запуск основной функции приложения
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

@@ -24,7 +24,7 @@ conn = psycopg2.connect("""
     sslmode=verify-full
     dbname=carsharing
     user=user1
-    password=password
+    password=
     target_session_attrs=read-write
 """)
 
@@ -94,10 +94,10 @@ VALUES
   (4.2, 5);
 
 -- Insert data into cars table
-INSERT INTO cars (model_id, rating_id, car_info_id, price, license_plate, available, status, description, location_id)
+INSERT INTO cars (model_id, rating_id, car_info_id, price, license_plate, available, status, description, location_id, level)
 VALUES
-  (1, 1, 1, 50.00, 'ABC123', true, 'available', 'Lorem ipsum dolor sit amet', 1),
-  (3, 2, 2, 60.00, 'XYZ789', true, 'available', 'Consectetur adipiscing elit', 2);
+  (1, 1, 1, 50.00, 'ABC123', true, 'available', 'Lorem ipsum dolor sit amet', 1, 1),
+  (3, 2, 2, 60.00, 'XYZ789', true, 'available', 'Consectetur adipiscing elit', 2, 2);
 
 -- Insert data into rentals table
 INSERT INTO rentals (user_id, car_id, start_datetime, end_datetime, pickup_location_id, dropoff_location_id, total_price, payment_status, status)
@@ -122,6 +122,9 @@ INSERT INTO reviews (user_id, car_id, rating, comment_id)
 VALUES
   (1, 1, 5, 1),
   (2, 2, 4, 2);
+
+  insert into levels(level_id, level) values (1, 'Elite'), (2, 'Standart')
+
 
 -- Insert data into payments table
 INSERT INTO payments (rental_id, amount, payment_method, status)
