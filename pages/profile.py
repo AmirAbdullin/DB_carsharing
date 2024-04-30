@@ -1,50 +1,37 @@
+from postgre import connect  # Используйте ваш модуль для работы с БД
+import os
+import sys
+sys.path.append(os.path.abspath("./../postgre"))
 import streamlit as st
-import pandas as pd
 
-# Фиктивная база данных пользователей
-users_data = {
-    "username": ["admin", "user1", "user2"],
-    "email": ["admin@example.com", "user1@example.com", "user2@example.com"],
-    "documents": ["Driver's License", "ID Card", "Passport"],
-    "history": ["2023-04-01: Toyota Corolla rented", "2023-03-25: Tesla Model 3 rented", "2023-04-01: LADA rented"]
-}
-
-# Преобразование данных в DataFrame
-df_users = pd.DataFrame(users_data)
-
-def show_profile(username):
-    st.title(f"Профиль пользователя: {username}")
-
-    # Получение данных о пользователе
-    user_info = df_users[df_users["username"] == username]
-
-    if not user_info.empty:
-        # Отображение основной информации о пользователе
-        st.subheader("Основная информация")
-        st.write(f"Имя пользователя: {username}")
-        st.write(f"Электронная почта: {user_info['email'].values[0]}")
-
-        # Отображение документов пользователя
-        st.subheader("Документы пользователя")
-        documents = user_info["documents"].values[0].split(", ")
-        for document in documents:
-            st.write(f"- {document}")
-
-        # Отображение истории аренды
-        st.subheader("История аренды")
-        history = user_info["history"].values[0].split(", ")
-        for event in history:
-            st.write(f"- {event}")
-
+def show_user_profile(user_id):
+    print(user_id)
+    query = """
+    SELECT first_name, last_name, phone_number, country, city, birth_date, issue_date, expiration_date
+    FROM user_personal_info
+    WHERE id = '{user_id[0]}';
+    """
+    user_info = connect.fetch_all(query) 
+    if user_info:
+        user_info = user_info[0]
+        st.write(f"**First Name:** {user_info[0]}")
+        st.write(f"**Last Name:** {user_info[1]}")
+        st.write(f"**Phone Number:** {user_info[2]}")
+        st.write(f"**Country:** {user_info[3]}")
+        st.write(f"**City:** {user_info[4]}")
+        st.write(f"**Birth Date:** {user_info[5].strftime('%Y-%m-%d')}")
+        st.write(f"**Passport Issue Date:** {user_info[6].strftime('%Y-%m-%d')}")
+        st.write(f"**Passport Expiration Date:** {user_info[7].strftime('%Y-%m-%d')}")
     else:
-        st.error("Пользователь не найден.")
+        st.error("User not found!")
+
 
 # Определяем главную функцию для отображения страницы профиля
 def main():
     # Получаем имя текущего пользователя (можно заменить на реальный механизм аутентификации)
-    current_user = "admin"  # Пример: имя текущего пользователя
+    # current_user = user_id  # Пример: имя текущего пользователя
 
-    show_profile(current_user)
+    show_user_profile(st.session_state["user_id"])
 
 # Запуск основной функции приложения
 if __name__ == "__main__":
