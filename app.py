@@ -1,28 +1,23 @@
 import streamlit as st
 from pages import login, map_view  # Импортируем функции страниц из директории pages
-from postgre import async_connection
-import asyncio
-import os
 
+def main():
+    if 'page' not in st.session_state:
+        st.session_state['page'] = 'login'  # Начальное состояние страницы
 
-pg = async_connection.PG([os.environ.get("DB_CREDENTIALS", "")])
+    st.sidebar.title("Навигация")
+    page = st.sidebar.radio("Выберите страницу", ['login', 'map'])
 
+    # Отображаем страницу в зависимости от состояния
+    if page == 'login' or st.session_state['page'] == 'login':
+        login.login_page()  # Показываем страницу логина
+        if 'user_id' in st.session_state:  # Проверяем, есть ли ID пользователя в сессии
+            st.session_state['page'] = 'map'  # Если авторизация прошла успешно, переключаемся на карту
+            page = 'map'  # Обновляем текущую страницу на карту
+            st.rerun()  # Перезапускаем приложение для отображения карты
 
-async def main():
-    print(await pg.get_table("users"))
-    
-    st.sidebar.title("Навигация")  # Заголовок боковой панели (sidebar) для навигации
+    if page == 'map' and 'user_id' in st.session_state:
+        map_view.show_map_view()  # Показываем карту
 
-    # Создаем словарь для хранения названий страниц и соответствующих функций
-    pages = {
-        "Авторизация": login.login_page,
-        #"Карта автомобилей": map_view.show_map_view
-    }
-
-    # Добавляем в боковую панель радиокнопки для выбора страницы
-    selected_page = st.sidebar.radio("Выберите страницу", list(pages.keys()))
-
-    # Запускаем функцию выбранной страницы
-    pages[selected_page]()
-
-asyncio.run(main())
+if __name__ == "__main__":
+    main()

@@ -1,52 +1,53 @@
-import streamlit as st
-from postgre import async_connection
-import asyncio
 import os
+import sys
+sys.path.append(os.path.abspath("./../postgre"))
+import streamlit as st
+from postgre import connect
+import asyncio
+
 
 # Определение переменных
 PAGE_LOGIN = "Login"
 PAGE_MAP_VIEW = "Map View"
 
 # Подключение к базе данных
-pg = async_connection.PG([os.environ.get("DB_CREDENTIALS", "")])
 
-async def authenticate(email, password):
+
+def authenticate(email, password):
     """
-    Функция аутентификации пользователя.
+    Authenticate a user.
 
     Args:
-        email (str): Адрес электронной почты пользователя.
-        password (str): Пароль пользователя.
+        email (str): User's email.
+        password (str): User's password.
 
     Returns:
-        bool: True, если аутентификация прошла успешно, иначе False.
+        int: User ID if authentication is successful, otherwise False.
     """
-    # Выполняем запрос к базе данных для получения пользователя с указанным email и паролем
-    users = await pg.fetch("SELECT * FROM users WHERE email = $1 AND password = $2", email, password)
-    if users:
-        return True
-    else:
-        return False
+    query = f"SELECT id FROM users WHERE email = '{email}' AND password = '{password}'"
+    user = connect.fetch_all(query)
+    if user:
+        return user[0]
+    return False
 
-async def login_page():
+def login_page():
     """
-    Функция для отображения страницы авторизации.
+    Display the login page.
     """
     st.title("Авторизация")
-
     email = st.text_input("Email")
     password = st.text_input("Пароль", type="password")
 
     if st.button("Войти"):
-        if await authenticate(email, password):
-            # Успешная авторизация
+        user_id = authenticate(email, password)
+        if user_id:
             st.success("Успешная авторизация!")
-            # Устанавливаем состояние страницы на MAP_VIEW
-            st.session_state["page"] = PAGE_MAP_VIEW
+            st.session_state["user_id"] = user_id
+            st.session_state["page"] = "Map View"
+            st.rerun()
         else:
-            st.error("Неверные учетные данные. Пожалуйста, попробуйте снова.")
+            st.error("Неверные учетные данные.")
 
-# Функция для отображения страницы карты
 def show_map_view():
     """
     Функция для отображения страницы карты.
@@ -54,18 +55,17 @@ def show_map_view():
     st.title("Карта доступных автомобилей")
     st.write("Здесь будет отображена карта с доступными автомобилями")
 
-# Определяем главную функцию приложения
-async def main():
-    # Инициализация состояния страницы, если оно не определено
+def main():
+    """
+    Главная функция приложения для управления страницами.
+    """
     if "page" not in st.session_state:
         st.session_state["page"] = PAGE_LOGIN
 
-    # Определение условий для переключения между страницами
     if st.session_state["page"] == PAGE_LOGIN:
-        await login_page()
+        login_page()
     elif st.session_state["page"] == PAGE_MAP_VIEW:
         show_map_view()
 
-# Запуск основной функции приложения
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

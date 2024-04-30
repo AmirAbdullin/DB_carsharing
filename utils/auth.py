@@ -1,15 +1,17 @@
 # Модуль utils/auth.py
 import streamlit as st
-from postgre import async_connection
-import asyncio
+from postgre import connect  # Убедитесь, что класс PG адаптирован под psycopg2
 import os
-# Подключение к базе данных
-pg = async_connection.PG([os.environ.get("DB_CREDENTIALS", "")])
+import sys
+sys.path.append(os.path.abspath("./../postgre"))
 
-async def authenticate(email, password):
+# Подключение к базе данных
+pg = connect()  # Создание экземпляра класса для работы с базой данных
+
+def authenticate(email, password):
     """
     Функция аутентификации пользователя.
-
+    
     Args:
         email (str): Адрес электронной почты пользователя.
         password (str): Пароль пользователя.
@@ -17,9 +19,9 @@ async def authenticate(email, password):
     Returns:
         bool: True, если аутентификация прошла успешно, иначе False.
     """
-    # Выполняем запрос к базе данных для получения пользователя с указанным email и паролем
-    users = await pg.fetch("SELECT * FROM users WHERE email = $1 AND password = $2", email, password)
-    if users:
+    query = f"SELECT id FROM users WHERE email = '{email}' AND password = '{password}'"
+    user = connect.fetch_all(query)  # Используем execute_query для синхронного запроса
+    if user:
         return True
     else:
         return False

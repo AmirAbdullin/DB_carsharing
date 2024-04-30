@@ -1,21 +1,21 @@
+import os
+import sys
+sys.path.append(os.path.abspath("./../postgre"))
 import streamlit as st
 import pandas as pd
 import folium
-import asyncio
-import os
-from postgre import async_connection
+from postgre import connect  # Убедитесь, что PG настроен для использования psycopg2
 
 # Подключаемся к базе данных
-pg = async_connection.PG([os.environ.get("DB_CREDENTIALS", "")])
+# pg = connect.PG()  # Создаем экземпляр PG
 
-# Определяем главную функцию для отображения карты
-async def show_map_view():
+def show_map_view():
     st.title("Карта всех автомобилей")
 
     # Получаем данные об уровнях автомобилей из базы данных
     levels_query = "SELECT * FROM levels;"
-    levels_data = await pg.fetch(levels_query)
-    levels_dict = {level['level_id']: level['level'] for level in levels_data}
+    levels_data = connect.fetch_all(levels_query)
+    levels_dict = {level[0]: level[1] for level in levels_data}
 
     # Выбор уровня автомобиля
     level_id = st.selectbox("Выберите уровень автомобиля:", options=["Все"] + list(levels_dict.values()))
@@ -33,7 +33,7 @@ async def show_map_view():
     JOIN levels ON cars.level = levels.level_id
     {condition};
     """
-    cars_data = await pg.fetch(cars_query)
+    cars_data = connect.fetch_all(cars_query)
 
     # Создание базовой карты с центром в центре Москвы
     map_center = [55.751244, 37.618423]  # Центр Москвы
@@ -42,15 +42,15 @@ async def show_map_view():
     # Определение цветов для разных уровней автомобилей
     level_colors = {
         'Elite': "purple",  # Elite
-        'Stadnart': "cadetblue",   # Standard
+        'Stadnart': "yellow",   # Standard
     }
 
     # Отображение машин на карте
     for car in cars_data:
-        car_id = car['id']
-        latitude = car['latitude']
-        longitude = car['longitude']
-        level = car['level']
+        car_id = car[0]
+        latitude = car[1]
+        longitude = car[2]
+        level = car[3]
 
         # Определение цвета значка в зависимости от уровня автомобиля
         icon_color = level_colors.get(level, "gray")
@@ -70,10 +70,8 @@ async def show_map_view():
     # Отображение HTML с помощью st.components.v1.html
     st.components.v1.html(map_html, width=700, height=500)
 
-# Определяем главную функцию для запуска приложения
-async def main():
-    await show_map_view()
+def main():
+    show_map_view()
 
-# Запуск основной функции приложения
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

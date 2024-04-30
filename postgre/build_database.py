@@ -6,7 +6,7 @@ conn = psycopg2.connect("""
     sslmode=verify-full
     dbname=carsharing
     user=user1
-    password=<пароль>
+    password=
     target_session_attrs=read-write
 """)
 
@@ -81,7 +81,8 @@ CREATE TABLE cars (
   description TEXT,
   location_id INTEGER,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  level integer
 );
 
 CREATE TABLE cars_info (
@@ -156,9 +157,15 @@ CREATE TABLE payments (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE levels (
+  level_id SERIAL PRIMARY KEY,
+  level varchar(50)
+);
+
 ALTER TABLE users ADD FOREIGN KEY (user_type) REFERENCES user_types (user_type);
 ALTER TABLE users ADD FOREIGN KEY (user_info_id) REFERENCES user_personal_info (id);
 ALTER TABLE cars ADD FOREIGN KEY (car_info_id) REFERENCES cars_info (id);
+ALTER TABLE cars ADD FOREIGN KEY (level) REFERENCES levels (level_id);
 ALTER TABLE user_personal_info ADD FOREIGN KEY (passport_id) REFERENCES passports (id);
 ALTER TABLE driver_licenses ADD FOREIGN KEY (user_id) REFERENCES users (id);
 ALTER TABLE car_models ADD FOREIGN KEY (brand_id) REFERENCES car_brands (id);
