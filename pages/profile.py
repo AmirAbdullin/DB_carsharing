@@ -6,7 +6,7 @@ import streamlit as st
 
 def show_user_profile(user_id):
     print(user_id)
-    query = """
+    query = f"""
     SELECT first_name, last_name, phone_number, country, city, birth_date, issue_date, expiration_date
     FROM user_personal_info
     WHERE id = '{user_id[0]}';
@@ -31,7 +31,8 @@ def main():
     # Получаем имя текущего пользователя (можно заменить на реальный механизм аутентификации)
     # current_user = user_id  # Пример: имя текущего пользователя
 
-    show_user_profile(st.session_state["user_id"])
+    
+    show_user_profile(st.session_state['user_id'])
 
 # Запуск основной функции приложения
 if __name__ == "__main__":
