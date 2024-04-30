@@ -3,12 +3,12 @@ import sys
 sys.path.append(os.path.abspath("./../postgre"))
 import streamlit as st
 from postgre import connect
-import asyncio
+
 
 
 # Определение переменных
-PAGE_LOGIN = "Login"
-PAGE_MAP_VIEW = "Map View"
+PAGE_LOGIN = "login"
+PAGE_MAP_VIEW = "map"
 
 # Подключение к базе данных
 
@@ -43,7 +43,7 @@ def login_page():
         if user_id:
             st.success("Успешная авторизация!")
             st.session_state["user_id"] = user_id
-            st.session_state["page"] = "Map View"
+            st.session_state["page"] = "map"
             st.rerun()
         else:
             st.error("Неверные учетные данные.")
@@ -64,8 +64,8 @@ def main():
 
     if st.session_state["page"] == PAGE_LOGIN:
         login_page()
-    elif st.session_state["page"] == PAGE_MAP_VIEW:
-        show_map_view()
+    # elif st.session_state["page"] == PAGE_MAP_VIEW:
+    #     show_map_view()
 
 if __name__ == "__main__":
     main()

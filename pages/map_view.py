@@ -48,15 +48,22 @@ def show_map_view():
     # Отображение машин на карте
     for car in cars_data:
         car_id = car[0]
-        latitude = car[1]
-        longitude = car[2]
-        level = car[3]
+        latitude = car[13]
+        longitude = car[14]
+        level = car[15]
+        car_price = car[4]  # Предположим, что статус - это пятый элемент в кортеже
+        license_plate = car[5]
 
         # Определение цвета значка в зависимости от уровня автомобиля
         icon_color = level_colors.get(level, "gray")
 
         # Отметка на карте для машины
-        popup_html = f"<b>Car ID:</b> {car_id}<br><b>Status:</b> {car['status']}<br><b>Description:</b> {car['description']}"
+        popup_html = f"""
+    <b>Car ID:</b> {car_id}<br>
+    <b>Price:</b> {car_price}<br>
+    <b>license_plate:</b> {license_plate}<br>
+    <b>Coordinates:</b> Latitude {latitude}, Longitude {longitude}
+    """
         marker = folium.Marker(
             location=[latitude, longitude],
             popup=popup_html,
