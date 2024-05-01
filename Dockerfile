@@ -9,8 +9,10 @@ RUN mkdir -p ~/.postgresql && \
          --output-document ~/.postgresql/root.crt && \
     chmod 0600 ~/.postgresql/root.crt
 
-
-
+RUN mkdir -p ~/.redis && \
+    wget "https://storage.yandexcloud.net/cloud-certs/CA.pem" \
+         --output-document ~/.redis/YandexInternalRootCA.crt && \
+    chmod 0655 ~/.redis/YandexInternalRootCA.crt
 
 COPY requirements.txt /app/
 
@@ -18,13 +20,11 @@ RUN pip3 install --upgrade pip -r  /app/requirements.txt --break-system-packages
 
 COPY ["./app.py", "/app/"]
 COPY ["./postgre/.", "/app/postgre"]
+COPY ["./redis_lib/.", "/app/redis_lib"]
 COPY ["./pages/.", "/app/pages"]
 COPY ["./images/.", "/app/images"]
 COPY ["./utils/.", "/app/utils"]
 
-
-
-RUN ls 
 WORKDIR /app
 
 EXPOSE 80
