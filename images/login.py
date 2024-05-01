@@ -12,34 +12,13 @@ PAGE_MAP_VIEW = "map"
 
 # Подключение к базе данных
 
-
-def authenticate(email, password):
-    """
-    Authenticate a user.
-
-    Args:
-        email (str): User's email.
-        password (str): User's password.
-
-    Returns:
-        int: User ID if authentication is successful, otherwise False.
-    """
-    query = f"SELECT id FROM users WHERE email = '{email}' AND password = '{password}'"
-    user = connect.fetch_all(query)
-    if user:
-        return user[0]
-    return False
-
 def login_page():
-    """
-    Display the login page.
-    """
     st.title("Авторизация")
     email = st.text_input("Email")
     password = st.text_input("Пароль", type="password")
 
     if st.button("Войти"):
-        user_id = authenticate(email, password)
+        user_id = connect.sign_in_user(email, password)
         if user_id:
             st.success("Успешная авторизация!")
             st.session_state["user_id"] = user_id

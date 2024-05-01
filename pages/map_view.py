@@ -1,14 +1,12 @@
-import os
-import sys
-sys.path.append(os.path.abspath("./../postgre"))
 from pages.profile import show_user_profile
 import streamlit as st
 import pandas as pd
 import folium
-from postgre import connect  # Убедитесь, что PG настроен для использования psycopg2
+from postgre import connect  
+import os
+import sys
+sys.path.append(os.path.abspath("./../postgre"))
 
-# Подключаемся к базе данных
-# pg = connect.PG()  # Создаем экземпляр PG
 
 def show_map_view():
     if 'user_id' in st.session_state:
