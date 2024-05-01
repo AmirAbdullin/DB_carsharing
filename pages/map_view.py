@@ -9,6 +9,10 @@ sys.path.append(os.path.abspath("./../postgre"))
 
 
 def show_map_view():
+    if 'user_id' in st.session_state:
+        if st.button("Профиль"):
+            show_user_profile(st.session_state['user_id'])
+            
     st.title("Карта всех автомобилей")
 
     # Получаем данные об уровнях автомобилей из базы данных
@@ -76,13 +80,11 @@ def show_map_view():
     # Отображение HTML с помощью st.components.v1.html
     st.components.v1.html(map_html, width=700, height=500)
 
-    if 'user_id' in st.session_state:
-        if st.button("Профиль"):
-            show_user_profile(st.session_state['user_id'])
+    
 
 def main():
     show_map_view()
 
 if __name__ == "__main__":
-    st.set_page_config(page_title="Map View", layout="wide")
+    st.set_page_config(page_title="map", layout="wide")
     main()

@@ -5,7 +5,7 @@ import sys
 sys.path.append(os.path.abspath("./../postgre"))
 
 def show_user_profile(user_id):
-   
+
     query = f"""
     SELECT first_name, last_name, phone_number, country, city, birth_date, issue_date, expiration_date
     FROM user_personal_info
@@ -27,12 +27,14 @@ def show_user_profile(user_id):
 
 
 def main():
+
     
     if 'user_id' in st.session_state:
         print(st.session_state['user_id'])
         show_user_profile(st.session_state["user_id"])
     else:
         print('no')
+
 
 # Запуск основной функции приложения
 if __name__ == "__main__":
